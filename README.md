@@ -3,27 +3,13 @@ Thanks to https://github.com/musikalkemist/generating-melodies-with-rnn-lstm/tre
 # Expected folder structure:
 -| data  
 ---| processed_with_mapping  #holds proccessed data  
-------| 0  
----------| chords-context.txt  
----------| chords.txt  
----------| melody.txt  
-------| 1  
----------| chords-context.txt  
----------| chords.txt  
----------| melody.txt  
-------| 2  
+------| {idx}    
 ---------| chords-context.txt  
 ---------| chords.txt  
 ---------| melody.txt  
   
 ---| transposed_midi  #holds midi data that will be proccessed  
-------| 0  
----------| midi-chords.mid  
----------| midi-melody.mid  
-------| 1  
----------| midi-chords.mid  
----------| midi-melody.mid  
-------| 2  
+------| {idx}    
 ---------| midi-chords.mid  
 ---------| midi-melody.mid  
   
