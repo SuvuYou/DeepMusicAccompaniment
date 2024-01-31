@@ -9,8 +9,8 @@ from const import DEFAULT_SEQUENCE_LENGTH, MAPPINGS_PATH, MODEL_SETTINGS, DEFAUL
 
 class Generator:
     def __init__(self):
-        self.melody_model_weights_path = DEFAULT_MELODY_MODEL_WEIGHTS_FILE_NAME(0)
-        self.chords_model_weights_path = DEFAULT_CHORDS_MODEL_WEIGHTS_FILE_NAME(0)
+        self.melody_model_weights_path = DEFAULT_MELODY_MODEL_WEIGHTS_FILE_NAME(3)
+        self.chords_model_weights_path = DEFAULT_CHORDS_MODEL_WEIGHTS_FILE_NAME(3)
         
         melody_generation_model = MelodyLSTM(melody_input_size = MODEL_SETTINGS['melody']['melody_input_size'], 
                           chords_context_input_size = MODEL_SETTINGS['melody']['chords_context_input_size'], 
@@ -168,10 +168,24 @@ class Generator:
 if __name__ == "__main__":
     mg = Generator()
     notes_to_generage_count = 500
-    seed_melody = "64 71 69 64 64 71 69 64 64 71 69 64"
-    seed_chords = "(C-E-A) _ _ _ _ _ _ _ _ _ _ _"
-    seed_chords_context = seed_chords.replace("_", "(C-E-A)")
-    seed_video, fps = load_video_frames(folder_path="original-180.mp4")
+    seeds = {
+        "fast":{
+            "seed_melody": "64 71 69 64 64 71 69 64 64 71 69 64",
+            "seed_chords": "(C-E-A) _ _ _ _ _ _ _ _ _ _ _",
+            "seed_chords_context": "(C-E-A) _ _ _ _ _ _ _ _ _ _ _".replace("_", "(C-E-A)")
+        },
+        "slow":{
+            "seed_melody": "r _ _ _ _ _ _ _ _ _ _ _",
+            "seed_chords": "(D-F-B) _ _ _ _ _ _ _ _ _ _ _",
+            "seed_chords_context": "(D-F-B) _ _ _ _ _ _ _ _ _ _ _".replace("_", "(D-F-B)")
+        }
+    }
+    
+    seed_melody = seeds["fast"]["seed_melody"]
+    seed_chords = seeds["fast"]["seed_chords"]
+    seed_chords_context = seeds["fast"]["seed_chords_context"]
+    
+    seed_video, fps = load_video_frames(folder_path="original-180-fast.mp4")
     video_frames = process_video(video=seed_video, target_video_length_in_frames=notes_to_generage_count + len(seed_melody.split()))
  
     chords, melody = mg.generate(melody_seed=seed_melody,
