@@ -25,6 +25,7 @@ chords_model = ChordsLSTM(input_size = MODEL_SETTINGS['chords']['input_size'],
                           )
 
 starting_weights_idx = 50
+
 melody_model.load_state_dict(torch.load(DEFAULT_MELODY_MODEL_WEIGHTS_FILE_NAME(starting_weights_idx)))
 chords_model.load_state_dict(torch.load(DEFAULT_CHORDS_MODEL_WEIGHTS_FILE_NAME(starting_weights_idx)))
 

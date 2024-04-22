@@ -186,6 +186,7 @@ if __name__ == "__main__":
     seed_chords_context = seeds["fast"]["seed_chords_context"]
     
     seed_video, fps = load_video_frames(folder_path="generated/original-180-fast.mp4")
+
     video_frames = process_video(video=seed_video, target_video_length_in_frames=notes_to_generage_count + len(seed_melody.split()))
  
     chords, melody = mg.generate(melody_seed=seed_melody,
