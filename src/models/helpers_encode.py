@@ -93,7 +93,6 @@ def encode_chords_with_no_duration(song, time_step=ACCEPTABLE_DURATIONS[0]):
         for _ in range(steps):
             encoded_song.append(symbol)
 
-
     encoded_song = " ".join(map(str, encoded_song))
 
     return encoded_song

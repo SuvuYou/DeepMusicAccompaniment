@@ -1,15 +1,15 @@
 import os
 import music21
 from helpers_encode import encode_chords, encode_melody, encode_chords_with_no_duration
-from const import TRANSPOSED_DATASET_PATH, CLEAN_DATA_FOLDER_PATH
+from const import PROCESSED_DATASET_PATH, MAPPED_MIDI_DATA_FOLDER_PATH
 import torchvision
 
 def load_midi_songs(type):
     """
     type: "melody" | "chords"
     """
-    load_path = TRANSPOSED_DATASET_PATH
-    save_path = CLEAN_DATA_FOLDER_PATH
+    load_path = PROCESSED_DATASET_PATH
+    save_path = MAPPED_MIDI_DATA_FOLDER_PATH
     songs = []
     paths = []
 
@@ -34,7 +34,7 @@ def load_txt_songs(type):
     """
     type: "melody" | "chords" | "chords-context"
     """
-    load_path = CLEAN_DATA_FOLDER_PATH
+    load_path = MAPPED_MIDI_DATA_FOLDER_PATH
     songs = []
 
     for path, _, files in os.walk(load_path):    
