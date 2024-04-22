@@ -4,7 +4,7 @@ import os
 import numpy as np
 from data_loader import MidiDatasetLoader
 from models import MelodyLSTM, ChordsLSTM
-from const import MODEL_SETTINGS, MAPPINGS_PATH, DEFAULT_MODEL_WEIGHTS_FOLDER_NAME, DEFAULT_CHORDS_MODEL_WEIGHTS_FILE_NAME, DEFAULT_MELODY_MODEL_WEIGHTS_FILE_NAME, DEVICE
+from const import MODEL_SETTINGS, MELODY_MAPPINGS_PATH, CHORDS_MAPPINGS_PATH, DEFAULT_MODEL_WEIGHTS_FOLDER_NAME, DEFAULT_CHORDS_MODEL_WEIGHTS_FILE_NAME, DEFAULT_MELODY_MODEL_WEIGHTS_FILE_NAME, DEVICE
 
 print("DEVICE -", DEVICE)
         
@@ -24,17 +24,18 @@ chords_model = ChordsLSTM(input_size = MODEL_SETTINGS['chords']['input_size'],
                           cnn_feature_size = MODEL_SETTINGS['chords']['cnn_feature_size'],
                           )
 
-starting_weights_idx = 17
+starting_weights_idx = 50
+
 melody_model.load_state_dict(torch.load(DEFAULT_MELODY_MODEL_WEIGHTS_FILE_NAME(starting_weights_idx)))
 chords_model.load_state_dict(torch.load(DEFAULT_CHORDS_MODEL_WEIGHTS_FILE_NAME(starting_weights_idx)))
 
 melody_model = melody_model.to(DEVICE)
 chords_model = chords_model.to(DEVICE)
 
-with open(f"{MAPPINGS_PATH}/melody_mappings.json", "r") as fp:
+with open(MELODY_MAPPINGS_PATH, "r") as fp:
             melody_mappings = json.load(fp)
     
-with open(f"{MAPPINGS_PATH}/chords_mappings.json", "r") as fp:
+with open(CHORDS_MAPPINGS_PATH, "r") as fp:
             chords_mappings = json.load(fp)        
             
 melody_symbols_count = melody_mappings['counter']['mapped_symbols']
@@ -149,11 +150,11 @@ for epoch in range(num_epochs):
     
     save_weight_idx = starting_weights_idx + epoch + 1
     
-    if not os.path.exists(DEFAULT_MODEL_WEIGHTS_FOLDER_NAME(idx = save_weight_idx)):
-        os.makedirs(DEFAULT_MODEL_WEIGHTS_FOLDER_NAME(idx = save_weight_idx))
+    # if not os.path.exists(DEFAULT_MODEL_WEIGHTS_FOLDER_NAME(idx = save_weight_idx)):
+    #     os.makedirs(DEFAULT_MODEL_WEIGHTS_FOLDER_NAME(idx = save_weight_idx))
         
-    torch.save(chords_model.state_dict(), DEFAULT_CHORDS_MODEL_WEIGHTS_FILE_NAME(idx = save_weight_idx))
-    torch.save(melody_model.state_dict(), DEFAULT_MELODY_MODEL_WEIGHTS_FILE_NAME(idx = save_weight_idx))
+    # torch.save(chords_model.state_dict(), DEFAULT_CHORDS_MODEL_WEIGHTS_FILE_NAME(idx = save_weight_idx))
+    # torch.save(melody_model.state_dict(), DEFAULT_MELODY_MODEL_WEIGHTS_FILE_NAME(idx = save_weight_idx))
     
 
 print_class_weights("Final weights:")

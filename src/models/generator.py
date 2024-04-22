@@ -5,7 +5,7 @@ import music21
 from models import MelodyLSTM, ChordsLSTM
 from helpers_load import load_video_frames
 from helpers_video_processing import process_video
-from const import DEFAULT_SEQUENCE_LENGTH, MAPPINGS_PATH, MODEL_SETTINGS, DEFAULT_MELODY_MODEL_WEIGHTS_FILE_NAME, DEFAULT_CHORDS_MODEL_WEIGHTS_FILE_NAME, ACCEPTABLE_DURATIONS
+from const import DEFAULT_SEQUENCE_LENGTH, MELODY_MAPPINGS_PATH, CHORDS_MAPPINGS_PATH, CHORDS_CONTEXT_MAPPINGS_PATH, MODEL_SETTINGS, DEFAULT_MELODY_MODEL_WEIGHTS_FILE_NAME, DEFAULT_CHORDS_MODEL_WEIGHTS_FILE_NAME, ACCEPTABLE_DURATIONS
 
 class Generator:
     def __init__(self):
@@ -35,13 +35,13 @@ class Generator:
         self.melody_generation_model = melody_generation_model
         self.chords_generation_model = chords_generation_model
         
-        with open(f"{MAPPINGS_PATH}/melody_mappings.json", "r") as fp:
+        with open(MELODY_MAPPINGS_PATH, "r") as fp:
             self._melody_mappings = json.load(fp)['mappings']
             
-        with open(f"{MAPPINGS_PATH}/chords_mappings.json", "r") as fp:
+        with open(CHORDS_MAPPINGS_PATH, "r") as fp:
             self._chords_mappings = json.load(fp)['mappings']    
             
-        with open(f"{MAPPINGS_PATH}/chords_context_mappings.json", "r") as fp:
+        with open(CHORDS_CONTEXT_MAPPINGS_PATH, "r") as fp:
             self._chords_context_mappings = json.load(fp)['mappings'] 
 
 
@@ -162,8 +162,8 @@ class Generator:
         stream.write('midi', file_name)
         
     def save_to_file(self, chords, melody, step_duration=ACCEPTABLE_DURATIONS[0]):
-        self._save_chord_progression(chords, step_duration, file_name='generated_chords.mid')
-        self._save_melody(melody, step_duration, file_name='generated_melody.mid')        
+        self._save_chord_progression(chords, step_duration, file_name='generated/generated_chords.mid')
+        self._save_melody(melody, step_duration, file_name='generated/generated_melody.mid')        
 
 if __name__ == "__main__":
     mg = Generator()
@@ -185,7 +185,8 @@ if __name__ == "__main__":
     seed_chords = seeds["fast"]["seed_chords"]
     seed_chords_context = seeds["fast"]["seed_chords_context"]
     
-    seed_video, fps = load_video_frames(folder_path="original-180-fast.mp4")
+    seed_video, fps = load_video_frames(folder_path="generated/original-180-fast.mp4")
+
     video_frames = process_video(video=seed_video, target_video_length_in_frames=notes_to_generage_count + len(seed_melody.split()))
  
     chords, melody = mg.generate(melody_seed=seed_melody,

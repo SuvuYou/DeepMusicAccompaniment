@@ -7,9 +7,5 @@ data
 # model weights
 weights
 
-# generated files 
-generated_chords.mid
-generated_melody.mid
-
-# video file for training and/or generating
-original-180.mp4
+# generated folder
+generated

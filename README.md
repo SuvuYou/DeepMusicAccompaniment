@@ -2,7 +2,7 @@ Thanks to https://github.com/musikalkemist/generating-melodies-with-rnn-lstm/tre
 
 # Expected folder structure:
 -| data  
----| processed_with_mapping  #holds proccessed data  
+---| 4_extracted_processed  #holds proccessed data  
 ------| {idx}    
 ---------| chords-context.txt  
 ---------| chords.txt  

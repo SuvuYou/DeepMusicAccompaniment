@@ -100,7 +100,7 @@ class MelodyLSTM(torch.nn.Module):
         self.sigmoid = torch.nn.Sigmoid()
         self.softmax = torch.nn.Softmax()
         
-    def forward(self, melody, chords, video):   
+    def forward(self, melody, chords_context, video):   
         # LSTM forward pass
         lstm_out, _ = self.lstm(melody)
         lstm_out = self.relu(lstm_out)
@@ -125,7 +125,7 @@ class MelodyLSTM(torch.nn.Module):
         cnn_output = self.dropout(cnn_output)
         
         # Chords forward pass
-        chords_output = self.fc_chords_in(chords)
+        chords_output = self.fc_chords_in(chords_context)
         chords_output = self.relu(chords_output)
         chords_output = self.dropout(chords_output)
         
