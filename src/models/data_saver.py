@@ -8,7 +8,7 @@ from helpers_encode import padd_encoded_song_with_rest
 from helpers_mappings import convert_songs_to_int, get_mappings_size
 from helpers import has_only_numbers, find_greatest_common_divisor
 from helpers_video_processing import process_video
-from const import MELODY_MAPPINGS_PATH, CHORDS_MAPPINGS_PATH, CHORDS_CONTEXT_MAPPINGS_PATH, MUSIC_DATA_CHUNKS_SAVE_PATH, VIDEO_CHUNKS_SAVE_PATH, DEFAULT_SEQUENCE_LENGTH, MAPPED_MIDI_DATA_FOLDER_PATH, DEVICE
+from const import MELODY_MAPPINGS_PATH, CHORDS_MAPPINGS_PATH, CHORDS_CONTEXT_MAPPINGS_PATH, MUSIC_DATA_CHUNKS_SAVE_PATH, VIDEO_DATA_FOLDER_PATH, VIDEO_CHUNKS_SAVE_PATH, DEFAULT_SEQUENCE_LENGTH, MAPPED_MIDI_DATA_FOLDER_PATH, DEVICE
 
 np.set_printoptions(threshold=sys.maxsize, linewidth=100000)
 
@@ -109,7 +109,7 @@ class MidiDatasetSaver(Dataset):
             self.current_total_chunks = self.current_total_chunks + 1
 
 def save_data(song_lengths):  
-    dataset = MidiDatasetSaver(midi_data_folder = MAPPED_MIDI_DATA_FOLDER_PATH, video_data_folder = MAPPED_MIDI_DATA_FOLDER_PATH, song_lengths = song_lengths)
+    dataset = MidiDatasetSaver(midi_data_folder = MAPPED_MIDI_DATA_FOLDER_PATH, video_data_folder = VIDEO_DATA_FOLDER_PATH, song_lengths = song_lengths)
 
     for idx in range(len(dataset)):
         _ = dataset[idx]

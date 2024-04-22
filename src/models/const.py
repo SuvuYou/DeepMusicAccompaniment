@@ -3,14 +3,18 @@ import os
 import torch
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 RAW_DATASET_PATH = "data"
+
 PROCESSED_DATASET_PATH = f"{RAW_DATASET_PATH}/3_processed_synced_midi"
 MAPPED_MIDI_DATA_FOLDER_PATH = f"{RAW_DATASET_PATH}/4_mapped_synced_midi"
-VIDEO_DATA_FOLDER_PATH = f"{RAW_DATASET_PATH}/4_mapped_synced_midi"
+VIDEO_DATA_FOLDER_PATH = f"{RAW_DATASET_PATH}/2_synced_midi_and_video"
+
 MAPPINGS_PATH = f"{RAW_DATASET_PATH}/5_mappings"
 MELODY_MAPPINGS_PATH = f"{MAPPINGS_PATH}/melody_mappings.json"
 CHORDS_MAPPINGS_PATH = f"{MAPPINGS_PATH}/chords_mappings.json"
 CHORDS_CONTEXT_MAPPINGS_PATH = f"{MAPPINGS_PATH}/chords_context_mappings.json"
+
 MUSIC_DATA_CHUNKS_SAVE_PATH = f"{RAW_DATASET_PATH}/6_stored_chunked_data/tensors"
 VIDEO_CHUNKS_SAVE_PATH = f"{RAW_DATASET_PATH}/6_stored_chunked_data/tensors_video"
 

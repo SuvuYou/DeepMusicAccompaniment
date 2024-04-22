@@ -15,5 +15,4 @@ if __name__ == "__main__":
     create_mapping(chords_songs, CHORDS_MAPPINGS_PATH)
     create_mapping(chords_context_songs, CHORDS_CONTEXT_MAPPINGS_PATH)
 
-    # song_lengths = melody_lengths + chords_lengths
     save_data(song_lengths = melody_lengths + chords_lengths)
