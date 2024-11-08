@@ -8,29 +8,15 @@ from const import MODEL_SETTINGS, MELODY_MAPPINGS_PATH, CHORDS_MAPPINGS_PATH, DE
 
 print("DEVICE -", DEVICE)
         
-melody_model = MelodyLSTM(melody_input_size = MODEL_SETTINGS['melody']['melody_input_size'], 
-                          chords_context_input_size = MODEL_SETTINGS['melody']['chords_context_input_size'], 
-                          hidden_size = MODEL_SETTINGS['melody']['hidden_size'], 
-                          num_layers = MODEL_SETTINGS['melody']['num_layers'],  
-                          output_size = MODEL_SETTINGS['melody']['output_size'],
-                          cnn_feature_size = MODEL_SETTINGS['melody']['cnn_feature_size'],
-                          chords_feature_size = MODEL_SETTINGS['melody']['chords_feature_size']
-                          )
+melody_model = MelodyLSTM(**MODEL_SETTINGS['melody']).to(DEVICE)
+chords_model = ChordsLSTM(**MODEL_SETTINGS['chords']).to(DEVICE)
 
-chords_model = ChordsLSTM(input_size = MODEL_SETTINGS['chords']['input_size'], 
-                          hidden_size = MODEL_SETTINGS['chords']['hidden_size'], 
-                          num_layers = MODEL_SETTINGS['chords']['num_layers'],  
-                          output_size = MODEL_SETTINGS['chords']['output_size'],
-                          cnn_feature_size = MODEL_SETTINGS['chords']['cnn_feature_size'],
-                          )
+# 19 works
+starting_weights_idx = 19
 
-starting_weights_idx = 67
-
-melody_model.load_state_dict(torch.load(DEFAULT_MELODY_MODEL_WEIGHTS_FILE_NAME(starting_weights_idx)))
-chords_model.load_state_dict(torch.load(DEFAULT_CHORDS_MODEL_WEIGHTS_FILE_NAME(starting_weights_idx)))
-
-melody_model = melody_model.to(DEVICE)
-chords_model = chords_model.to(DEVICE)
+if starting_weights_idx != -1:
+    melody_model.load_state_dict(torch.load(DEFAULT_MELODY_MODEL_WEIGHTS_FILE_NAME(starting_weights_idx)))
+    chords_model.load_state_dict(torch.load(DEFAULT_CHORDS_MODEL_WEIGHTS_FILE_NAME(starting_weights_idx)))
 
 with open(MELODY_MAPPINGS_PATH, "r") as fp:
             melody_mappings = json.load(fp)
@@ -72,12 +58,20 @@ def update_chords_class_weight_by_percentage(symbol, percentage):
     
 print_class_weights("Initial weights:")
 
-update_melody_class_weight_by_percentage(symbol='_', percentage=195)
-update_melody_class_weight_by_percentage(symbol='64', percentage=90)
-update_melody_class_weight_by_percentage(symbol='65', percentage=95)
-update_melody_class_weight_by_percentage(symbol='71', percentage=95)
+update_melody_class_weight_by_percentage(symbol='_', percentage=185)
+update_melody_class_weight_by_percentage(symbol='r', percentage=120)
+update_melody_class_weight_by_percentage(symbol='60', percentage=102.5) # 102 - 103
+update_melody_class_weight_by_percentage(symbol='62', percentage=105)
+update_melody_class_weight_by_percentage(symbol='64', percentage=37) # > 35
+update_melody_class_weight_by_percentage(symbol='69', percentage=66.7) # < 67
+update_melody_class_weight_by_percentage(symbol='65', percentage=64) # < 65
+update_melody_class_weight_by_percentage(symbol='67', percentage=84.5) # < 85
+update_melody_class_weight_by_percentage(symbol='71', percentage=48.35) # 48-50
 
-update_chords_class_weight_by_percentage(symbol='_', percentage=175)
+update_chords_class_weight_by_percentage(symbol='_', percentage=200)
+update_chords_class_weight_by_percentage(symbol='r', percentage=140)
+update_chords_class_weight_by_percentage(symbol='(C-E-A)', percentage=80)
+
 
 melody_criterion = torch.nn.CrossEntropyLoss(weight=melody_class_weights)
 chords_criterion = torch.nn.CrossEntropyLoss(weight=chords_class_weights)
@@ -85,8 +79,8 @@ melody_criterion = melody_criterion.to(DEVICE)
 chords_criterion = chords_criterion.to(DEVICE)
 
 # TODO: Concider adding LR schedule
-melody_optimizer = torch.optim.Adam(melody_model.parameters(), lr=0.00001)
-chords_optimizer = torch.optim.Adam(chords_model.parameters(), lr=0.00001)
+melody_optimizer = torch.optim.Adam(melody_model.parameters(), lr=0.000001)
+chords_optimizer = torch.optim.Adam(chords_model.parameters(), lr=0.000001)
 
 dataset = MidiDatasetLoader()
 data_loader = torch.utils.data.DataLoader(dataset, batch_size=6, shuffle=True)  
@@ -150,11 +144,11 @@ for epoch in range(num_epochs):
     
     save_weight_idx = starting_weights_idx + epoch + 1
     
-    # if not os.path.exists(DEFAULT_MODEL_WEIGHTS_FOLDER_NAME(idx = save_weight_idx)):
-    #     os.makedirs(DEFAULT_MODEL_WEIGHTS_FOLDER_NAME(idx = save_weight_idx))
+    if not os.path.exists(DEFAULT_MODEL_WEIGHTS_FOLDER_NAME(idx = save_weight_idx)):
+        os.makedirs(DEFAULT_MODEL_WEIGHTS_FOLDER_NAME(idx = save_weight_idx))
         
-    # torch.save(chords_model.state_dict(), DEFAULT_CHORDS_MODEL_WEIGHTS_FILE_NAME(idx = save_weight_idx))
-    # torch.save(melody_model.state_dict(), DEFAULT_MELODY_MODEL_WEIGHTS_FILE_NAME(idx = save_weight_idx))
+    torch.save(chords_model.state_dict(), DEFAULT_CHORDS_MODEL_WEIGHTS_FILE_NAME(idx = save_weight_idx))
+    torch.save(melody_model.state_dict(), DEFAULT_MELODY_MODEL_WEIGHTS_FILE_NAME(idx = save_weight_idx))
     
 
 print_class_weights("Final weights:")

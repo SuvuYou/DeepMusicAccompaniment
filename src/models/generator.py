@@ -8,27 +8,16 @@ from helpers_video_processing import process_video
 from const import DEFAULT_SEQUENCE_LENGTH, MELODY_MAPPINGS_PATH, CHORDS_MAPPINGS_PATH, CHORDS_CONTEXT_MAPPINGS_PATH, MODEL_SETTINGS, DEFAULT_MELODY_MODEL_WEIGHTS_FILE_NAME, DEFAULT_CHORDS_MODEL_WEIGHTS_FILE_NAME, ACCEPTABLE_DURATIONS
 
 class Generator:
-    def __init__(self):
-        self.melody_model_weights_path = DEFAULT_MELODY_MODEL_WEIGHTS_FILE_NAME(3)
-        self.chords_model_weights_path = DEFAULT_CHORDS_MODEL_WEIGHTS_FILE_NAME(3)
+    def __init__(self, weights_path, save_file_name):
+        self.save_file_name = save_file_name
+        self.melody_model_weights_path = DEFAULT_MELODY_MODEL_WEIGHTS_FILE_NAME(weights_path)
+        self.chords_model_weights_path = DEFAULT_CHORDS_MODEL_WEIGHTS_FILE_NAME(weights_path)
         
-        melody_generation_model = MelodyLSTM(melody_input_size = MODEL_SETTINGS['melody']['melody_input_size'], 
-                          chords_context_input_size = MODEL_SETTINGS['melody']['chords_context_input_size'], 
-                          hidden_size = MODEL_SETTINGS['melody']['hidden_size'], 
-                          num_layers = MODEL_SETTINGS['melody']['num_layers'],  
-                          output_size = MODEL_SETTINGS['melody']['output_size'],
-                          cnn_feature_size = MODEL_SETTINGS['melody']['cnn_feature_size'],
-                          chords_feature_size = MODEL_SETTINGS['melody']['chords_feature_size']
-                          )
+        melody_generation_model = MelodyLSTM(**MODEL_SETTINGS['melody'])
 
         melody_generation_model.load_state_dict(torch.load(self.melody_model_weights_path))
         
-        chords_generation_model = ChordsLSTM(input_size = MODEL_SETTINGS['chords']['input_size'], 
-                          hidden_size = MODEL_SETTINGS['chords']['hidden_size'], 
-                          num_layers = MODEL_SETTINGS['chords']['num_layers'],  
-                          output_size = MODEL_SETTINGS['chords']['output_size'],
-                          cnn_feature_size = MODEL_SETTINGS['chords']['cnn_feature_size'],
-                          )
+        chords_generation_model = ChordsLSTM(**MODEL_SETTINGS['chords'])
 
         chords_generation_model.load_state_dict(torch.load(self.chords_model_weights_path))
             
@@ -162,17 +151,26 @@ class Generator:
         stream.write('midi', file_name)
         
     def save_to_file(self, chords, melody, step_duration=ACCEPTABLE_DURATIONS[0]):
-        self._save_chord_progression(chords, step_duration, file_name='generated/generated_chords.mid')
-        self._save_melody(melody, step_duration, file_name='generated/generated_melody.mid')        
-
-if __name__ == "__main__":
-    mg = Generator()
-    notes_to_generage_count = 500
+        self._save_chord_progression(chords, step_duration, file_name=f'generated/{self.save_file_name}_chords.mid')
+        self._save_melody(melody, step_duration, file_name=f'generated/{self.save_file_name}_melody.mid')        
+    
+def init_seed(type):
+    notes_to_generage_count = 200
     seeds = {
         "fast":{
             "seed_melody": "64 71 69 64 64 71 69 64 64 71 69 64",
             "seed_chords": "(C-E-A) _ _ _ _ _ _ _ _ _ _ _",
             "seed_chords_context": "(C-E-A) _ _ _ _ _ _ _ _ _ _ _".replace("_", "(C-E-A)")
+        },
+        "fast1":{
+            "seed_melody": "60 64 69 60 60 64 69 60 _ _ _ 67 71 64 67 71 71 64 67 71 71 64 67 71",
+            "seed_chords": "(C-E-G) _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (C-E-G) _ _ _ _ _ _ _",
+            "seed_chords_context": "(C-E-G) _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ (C-E-G) _ _ _ _ _ _ _".replace("_", "(C-E-G)")
+        },
+        "slow1":{
+            "seed_melody": "69 _ _ _ _ _ _ _ 69 _ 64 _ 71 _ 60 _ 60 _ _ _ _ _",
+            "seed_chords": "(D-F-A) _ _ _ _ _ _ _ (C-E-A) _ _ _ _ _ _ _ (C-E-A) _ _ _ _ _ _",
+            "seed_chords_context": "(D-F-A) _ _ _ _ _ _ _ (C-E-A) _ _ _ _ _ _ _ (C-E-A) _ _ _ _ _ _".replace("_", "(C-E-A)")
         },
         "slow":{
             "seed_melody": "r _ _ _ _ _ _ _ _ _ _ _",
@@ -181,22 +179,36 @@ if __name__ == "__main__":
         }
     }
     
-    seed_melody = seeds["fast"]["seed_melody"]
-    seed_chords = seeds["fast"]["seed_chords"]
-    seed_chords_context = seeds["fast"]["seed_chords_context"]
+    seed_melody = seeds[type]["seed_melody"]
+    seed_chords = seeds[type]["seed_chords"]
+    seed_chords_context = seeds[type]["seed_chords_context"]
     
-    seed_video, fps = load_video_frames(folder_path="generated/original-180-fast.mp4")
+    seed_video, fps = load_video_frames(folder_path=f"generated/original-180-{type}.mp4")
 
     video_frames = process_video(video=seed_video, target_video_length_in_frames=notes_to_generage_count + len(seed_melody.split()))
- 
-    chords, melody = mg.generate(melody_seed=seed_melody,
+    
+    return seed_melody, seed_chords, seed_chords_context, video_frames, notes_to_generage_count
+    
+def init_generator(weights_path, save_file_name):
+    generator = Generator(weights_path, save_file_name)
+    
+    return generator
+
+def generate_music(generator, seed_melody, seed_chords, seed_chords_context, video_frames, notes_to_generage_count):
+    chords, melody = generator.generate(melody_seed=seed_melody,
                          chords_seed=seed_chords,
                          chords_context_seed=seed_chords_context,
                          video=video_frames,
                          num_steps=notes_to_generage_count, 
                          max_sequence_length=DEFAULT_SEQUENCE_LENGTH, 
-                         temperature=0.2)
+                         temperature=0.9)
     
     print(chords, melody)
-    mg.save_to_file(chords, melody)
+    generator.save_to_file(chords, melody)
     
+    
+if __name__ == "__main__":
+    generator = init_generator(weights_path="19", save_file_name="generated")
+    seed_melody, seed_chords, seed_chords_context, video_frames, notes_to_generage_count = init_seed(type="fast1")
+    
+    generate_music(generator, seed_melody, seed_chords, seed_chords_context, video_frames, notes_to_generage_count)  

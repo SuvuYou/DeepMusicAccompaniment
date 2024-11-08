@@ -81,5 +81,5 @@ MODEL_SETTINGS = {
         "cnn_feature_size": 128,
         "num_layers": 3,
     },
-    "num_epochs": 50
+    "num_epochs": 15
 }
